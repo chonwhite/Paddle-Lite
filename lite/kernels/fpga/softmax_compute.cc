@@ -22,7 +22,7 @@ namespace fpga {
 
 using float16 = zynqmp::float16;
 
-void SoftmaxCompute::Run() {
+void SoftmaxCompute::PrepareForRun() {
   zynqmp::SoftmaxParam& softmax_param = pe_.param();
   auto& param = Param<operators::SoftmaxParam>();
 
@@ -31,6 +31,12 @@ void SoftmaxCompute::Run() {
   softmax_param.output = param.output->ZynqTensor();
   pe_.init();
   pe_.apply();
+}
+
+void SoftmaxCompute::Run() {
+  pe_.dispatch();
+  zynqmp::SoftmaxParam& softmax_param = pe_.param();
+  softmax_param.output->saveToFile("softmax.txt");
 }
 
 }  // namespace fpga

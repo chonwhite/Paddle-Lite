@@ -40,11 +40,27 @@ void ConvCompute::PrepareForRun() {
   conv_param.paddings = param.paddings;
   conv_param.dilations = param.dilations;
   fill_scale_bias_const(&conv_param);
+  conv_param.bias()->copyFrom(param.bias->ZynqTensor());
+  conv_param.relu.enabled = param.fuse_relu;
   pe_.init();
   pe_.apply();
 }
 
-void ConvCompute::Run() { pe_.dispatch(); }
+void ConvCompute::Run() { 
+  auto& param = this->Param<param_t>();
+  zynqmp::ConvParam& conv_param = pe_.param();
+
+  // conv_param.input->saveToFile("conv_input.txt");
+  // param.filter->ZynqTensor()->saveToFile("filter.txt");
+  // param.bias->ZynqTensor()->saveToFile("bias.txt");
+  // conv_param.input->scale()[0] = 1.0 / 127;
+  // conv_param.input->scale()[1] = 127;
+  
+  pe_.dispatch();
+  // conv_param.output->saveToFile("conv_output.txt");
+
+  // exit(-1);
+}
 
 }  // namespace fpga
 }  // namespace kernels
