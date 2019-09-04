@@ -14,6 +14,7 @@ limitations under the License. */
 
 #pragma once
 
+#include "lite/fpga/KD/dl_engine.hpp"
 #include "lite/fpga/KD/pe.hpp"
 #include "lite/fpga/KD/pe_params.hpp"
 
@@ -25,6 +26,8 @@ class OutputPE : public PE {
   bool init() {
     Tensor* output = param_.output;
     output->setAligned(false);
+    DLEngine::get_instance().out_data = reinterpret_cast<float*>(
+        fpga_malloc(output->shape().numel() * sizeof(float)));
     return true;
   }
 
@@ -41,6 +44,15 @@ class OutputPE : public PE {
     } else {
       output->copyFrom(input);
     }
+    //
+    output->syncToCPU();
+    if (DLEngine::get_instance().out_data == nullptr) {
+      DLEngine::get_instance().out_data = reinterpret_cast<float*>(
+          fpga_malloc(output->shape().numel() * sizeof(float)));
+    }
+    memcpy(DLEngine::get_instance().out_data,
+           output->data<void>(),
+           output->shape().numel() * sizeof(float));
     return true;
   }
 
