@@ -29,10 +29,7 @@ void ConvCompute::PrepareForRun() {
   // ====================================================
   zynqmp::ConvParam& conv_param = pe_.param();
   param.output->mutable_data<float16>();
-<<<<<<< HEAD
 
-=======
->>>>>>> quant resnet works
   conv_param.input = param.x->ZynqTensor();
   conv_param.output = param.output->ZynqTensor();
   conv_param.filter = param.filter->ZynqTensor();
